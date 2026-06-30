@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+.env
+*.log
+data/
+test_*.py
+fix_*.py
+p1_*.py
+p2_*.py
+p3_*.py
+app_patch.py
+gen_qr.py
