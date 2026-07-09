@@ -1,16 +1,4 @@
-I see! This is an older, simpler version of the README. 
-
-Looking at the actual code we reviewed earlier (specifically `src/exchanges.py`), there are a few **factual inaccuracies** in this old version that we need to fix for your portfolio:
-
-1. **The Exchange Count:** The old README lists **7 exchanges** (including Kraken, Coinbase, and Bitfinex). However, your actual code specifically comments out and removes those three because they **block Nigerian IPs or have geo-restrictions**. Your system actually monitors **5 exchanges** (Binance, KuCoin, Bybit, OKX, Gate.io). Highlighting this geographic constraint is actually a great "real-world engineering" talking point!
-2. **Missing Technical Depth:** It doesn't mention your **async architecture** (`asyncio`), which is the core reason your scanner is fast enough to actually work.
-3. **Missing the "Honest Caveats":** It doesn't include the transparent limitations section (execution latency) that is a signature part of your ChurnIQ documentation style.
-
-Here is the **fully updated, accurate README** that perfectly matches your actual codebase and aligns with the professional style of your ChurnIQ project. You can copy and paste this to replace your current `README.md`:
-
----
-
-```markdown
+```
 # ⚡ ArbitrageIQ — Real-Time Crypto Arbitrage Trading Terminal
 
 A production-grade crypto arbitrage scanner monitoring 5 exchanges and 30 symbols — with fee-adjusted profit calculations, async architecture, Telegram alerts, and a live Streamlit terminal.
