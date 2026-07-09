@@ -1,4 +1,4 @@
-```
+
 # ⚡ ArbitrageIQ — Real-Time Crypto Arbitrage Trading Terminal
 
 A production-grade crypto arbitrage scanner monitoring 5 exchanges and 30 symbols — with fee-adjusted profit calculations, async architecture, Telegram alerts, and a live Streamlit terminal.
