@@ -110,7 +110,7 @@ arbitrageiq/
     └── telegram_qr.png         # Telegram channel QR code
 ```
 
-## Honest limitations
+## limitations
 
 ### Execution latency
 
@@ -150,9 +150,6 @@ For live trading, you'd need to build the execution layer on top of this detecti
 5. **Risk management** — max position size, daily loss limits, circuit breakers
 6. **Automated testing and CI** — add unit tests, integration tests, deployment pipeline
 
-## License
-
-[Information Needed]
 
 ## Acknowledgements
 
