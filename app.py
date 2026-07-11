@@ -225,6 +225,9 @@ TELEGRAM_CHANNEL = "https://t.me/YemiCryptoTracker_Bot"
 TELEGRAM_BOT_LINK = "https://t.me/YemiCryptoTracker_Bot"
 
 # ── Ticker tape ───────────────────────────────────────────────────────────────
+# NOTE: these values are static placeholders, not live prices. Wire this to
+# ExchangeManager for real-time data before presenting the app as fully "live" —
+# a visibly frozen ticker undermines that framing more than removing it would.
 ticker_items = [
     ("BTC/USDT","$109,687","+1.09%",True), ("ETH/USDT","$3,842","+2.34%",True),
     ("SOL/USDT","$176.34","+3.45%",True),  ("BNB/USDT","$584.21","+0.87%",True),
@@ -293,8 +296,9 @@ with st.sidebar:
 
     threshold = st.slider("Min Profit Threshold (%)", 0.001, 2.0, 0.005, step=0.001, format="%.3f")
 
+    interval = "10 minutes"  # default fallback so it's always defined below
     if scan_mode == "Auto (Background Scanner)":
-        interval = st.selectbox("Scan Interval", ["5 minutes", "10 minutes", "15 minutes"])
+        interval = st.selectbox("Scan Interval", ["5 minutes", "10 minutes", "15 minutes"], index=1)
         st.markdown(f"""
         <div style="background:#1A1D24;border:1px solid #2D3140;border-radius:6px;
                     padding:10px 12px;margin-top:8px;font-size:0.72rem;color:#848E9C;line-height:1.8;">
@@ -305,6 +309,31 @@ with st.sidebar:
     st.markdown("<hr style='border-color:#1E2329;margin:14px 0;'>", unsafe_allow_html=True)
 
     auto_refresh = st.checkbox("Auto-refresh (60s)", value=True)
+
+    # ── Auto-mode scan trigger ──────────────────────────────────────────────
+    # This makes "Auto" mode actually run a scan on schedule, instead of being
+    # a label with no behavior behind it. IMPORTANT CAVEAT: this only fires
+    # while a browser tab is open and the auto-refresh loop is actively
+    # cycling (see time.sleep(60) below) — Streamlit Cloud does not run any
+    # code when no one is connected, so this is NOT true 24/7 background
+    # scanning. For genuine always-on coverage, scanner.py needs to run on a
+    # host with a persistent process (a small VPS, a Render/Railway background
+    # worker, or a scheduled GitHub Action), not inside this Streamlit app.
+    if scan_mode == "Auto (Background Scanner)" and auto_refresh:
+        interval_map = {"5 minutes": 300, "10 minutes": 600, "15 minutes": 900}
+        interval_sec = interval_map.get(interval, 600)
+        last_scan_time = st.session_state.get('last_auto_scan', 0)
+
+        if time.time() - last_scan_time >= interval_sec:
+            try:
+                subprocess.run(
+                    [sys.executable, "scanner.py", "--once", f"--threshold={threshold:.3f}"],
+                    capture_output=True, timeout=180,
+                    cwd=os.path.dirname(os.path.abspath(__file__))
+                )
+            except Exception:
+                pass  # scan failures here shouldn't crash the dashboard render
+            st.session_state['last_auto_scan'] = time.time()
 
     st.markdown("<hr style='border-color:#1E2329;margin:14px 0;'>", unsafe_allow_html=True)
 
@@ -365,7 +394,7 @@ with tab1:
                     <div class="tg-title">Get Live Arbitrage Alerts on Telegram</div>
                     <div class="tg-desc">
                         Join the ArbitrageIQ channel to receive instant alerts every time a profitable
-                        opportunity is detected — directly on your phone, 24/7.
+                        opportunity is detected — directly on your phone.
                     </div>
                 </div>
             </div>
@@ -729,7 +758,7 @@ with tab2:
                 No opportunities in last 24 hours
             </div>
             <div style="font-size:0.75rem;color:#5E6673;font-family:'IBM Plex Mono',monospace;">
-                Keep scanner.py running · python scanner.py --interval 10 --threshold 0.005
+                Keep scanner.py running · python scanner.py --interval 10 --threshold 0.15
             </div>
         </div>
         """, unsafe_allow_html=True)
