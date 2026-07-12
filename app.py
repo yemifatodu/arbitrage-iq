@@ -322,17 +322,19 @@ with st.sidebar:
     if scan_mode == "Auto (Background Scanner)" and auto_refresh:
         interval_map = {"5 minutes": 300, "10 minutes": 600, "15 minutes": 900}
         interval_sec = interval_map.get(interval, 600)
-        last_scan_time = st.session_state.get('last_auto_scan', 0)
+        last_scan_time = st.session_state.get('last_auto_scan', time.time())
+        st.session_state.setdefault('last_auto_scan', last_scan_time)
 
         if time.time() - last_scan_time >= interval_sec:
-            try:
-                subprocess.run(
-                    [sys.executable, "scanner.py", "--once", f"--threshold={threshold:.3f}"],
-                    capture_output=True, timeout=180,
-                    cwd=os.path.dirname(os.path.abspath(__file__))
-                )
-            except Exception:
-                pass  # scan failures here shouldn't crash the dashboard render
+            with st.spinner("Running scheduled scan..."):
+                try:
+                    subprocess.run(
+                        [sys.executable, "scanner.py", "--once", f"--threshold={threshold:.3f}"],
+                        capture_output=True, timeout=180,
+                        cwd=os.path.dirname(os.path.abspath(__file__))
+                    )
+                except Exception:
+                    pass
             st.session_state['last_auto_scan'] = time.time()
 
     st.markdown("<hr style='border-color:#1E2329;margin:14px 0;'>", unsafe_allow_html=True)
